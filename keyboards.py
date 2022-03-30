@@ -11,6 +11,6 @@ def keyboard_dict():
         "DICT_4X4_1000", "DICT_5X5_50","DICT_5X5_100", "DICT_5X5_250", "DICT_5X5_1000",
         "DICT_6X6_50", "DICT_6X6_100", "DICT_6X6_250", "DICT_6X6_1000", "DICT_7X7_50",
         "DICT_7X7_100", "DICT_7X7_250", "DICT_7X7_1000", "DICT_ARUCO_ORIGINAL"]
-    keyboard_1 = types.ReplyKeyboardMarkup(row_width=1)
+    keyboard_1 = types.ReplyKeyboardMarkup(row_width=1, one_time_keyboard=True)
     keyboard_1.add(*buttons_1)
     return keyboard_1
