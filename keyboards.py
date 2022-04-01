@@ -1,5 +1,7 @@
 from aiogram import types
 import cmd 
+
+
 def keyboard_main():
     buttons = types.KeyboardButton(cmd.generate_b)
     keyboard = types.ReplyKeyboardMarkup(row_width=1, resize_keyboard=True)

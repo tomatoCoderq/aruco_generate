@@ -1,3 +1,6 @@
+import logging
+import asyncio
+
 from aiogram import Bot, types, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
@@ -5,11 +8,8 @@ from app.config_reader import load_config
 from app.handlers.generate_marker import register_handlers_generate
 from app.handlers.common import register_handlers_common
 
-import sqlite3, logging, asyncio
+
 logger = logging.getLogger(__name__)
-
-
-
 async def main():
     logging.basicConfig(
         level = logging.INFO,
