@@ -1,13 +1,18 @@
-from ast import expr_context
+import logging
+import os 
+
 from aiogram import Dispatcher, types, exceptions
-import aiogram
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters import Text
+import cv2
+
+import cmd
+import keyboards
 
 
-import cmd, logging, keyboards, sqlite3, cv2, os, exceptions
 logger = logging.getLogger(__name__)
+choice = ["DICT_4X4", "DICT_5X5", "DICT_6X6", "DICT_7X7", "DICT_ARUCO_ORIGINAL"]
 
 
 class Generate(StatesGroup):
@@ -19,16 +24,21 @@ async def ask_dictionary(message:types.Message):
     await message.answer("Напишите, пожалуйста, какой размер маркера вы хотите использовать", reply_markup=keyboards.keyboard_dict())
     await Generate.waiting_for_dictionary.set()
 
+
 async def dictionary_chosen(message:types.Message, state: FSMContext):
-    await state.update_data(chosen_dictionary=message.text.lower())
-    await message.answer("<i>Отлично!</i> Теперь напишите id\n<b>Внимание!</b> Это должно быть число от 0 до 249 ")
-    await Generate.waiting_for_id.set()
-    logger.info(f"DICTIONARY: {message.text.lower()}")
+    if message.text in choice:      
+        await state.update_data(chosen_dictionary=message.text.lower())
+        await message.answer("<i>Отлично!</i> Теперь напишите id\n<b>Внимание!</b> Это должно быть число от 0 до 249 ")
+        await Generate.waiting_for_id.set()
+        logger.info(f"DICTIONARY: {message.text.lower()}")
+    else:
+        await message.answer("Используйте кнопки❗️")
+        return     
 
 async def id_chosen(message:types.Message, state: FSMContext):
     try:
-        if int(message.text.lower()) > 249:
-            await message.answer("Пожалуйста, впишите значение <b>меньше</b> 249")
+        if int(message.text.lower()) < 1 or int(message.text.lower()) > 249:
+            await message.answer("Пожалуйста, впишите значение <b>меньше</b> 249 и <b>больше</b> 0")
             return
     except ValueError:
         await message.answer("Введите, пожалуйста, целочисленное значение, которое меньше 249")
@@ -50,6 +60,7 @@ async def size_chosen(message:types.Message, state:FSMContext):
     await state.update_data(chosen_size=message.text.lower())
     await message.answer("<i>Готово!</i> Вот ваша Aruco-метка")
     user_data = await state.get_data()
+    
 
     logger.info(f"SIZE: {message.text.lower()}")
 
@@ -81,7 +92,7 @@ async def size_chosen(message:types.Message, state:FSMContext):
         await message.answer_photo(photo=photo, reply_markup=keyboards.keyboard_main())
     else:
         dictionary =  cv2.aruco.Dictionary_get(marker)
-        marker_image = cv2.aruco.drawMarker(dictionary, int(chosen_id), int(chosen_size))
+        marker_image = cv2.aruco.drawMarker(dictionary, abs(int(chosen_id)), abs(int(chosen_size)))
         cv2.imwrite(name, marker_image)
         photo = open(f"/Users/tomatocoder/Desktop/aruco_generate/{name}", 'rb')
         await message.answer_photo(photo=photo, reply_markup=keyboards.keyboard_main())
